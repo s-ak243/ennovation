@@ -24,12 +24,7 @@ class AuthenticationController extends Controller
             if(Auth::attempt(['email'=>request('email'), 'password'=>request('password')]))
             {
                 $user = Auth::user();
-                $details=array();
-                $details['id']=$user->id;
-                $details['first_name']= $user->first_name;
-                $details['last_name']= $user->last_name;
-                $details['email'] = $user->email;
-                $details['mobile_no'] = $user->mobile_no;
+                $details = $this->getUserDetail($user);
                 $details['token'] = $this->generateToken($user,$request->password);
                 $message="Login Successful.";
                 return sendSuccessResponse($message,$details);
@@ -56,12 +51,8 @@ class AuthenticationController extends Controller
         $user=User::create($input);
         if($user)
         {
+            $details = $this->getUserDetail($user);
             $details['token']= $this->generateToken($user,$input['password']);
-            $details['id']=$user->id;
-            $details['first_name']= $user->first_name;
-            $details['last_name']= $user->last_name;
-            $details['email'] = $user->email;
-            $details['mobile_no'] = $user->mobile_no;
             $message="User registered successfully.";
             return sendSuccessResponse($message,$details);
         }
@@ -71,5 +62,16 @@ class AuthenticationController extends Controller
     private function generateToken($user, $str)
     {
         return $user->createToken($str)->plainTextToken;
+    }
+
+    private function getUserDetail($user)
+    {
+        return [
+            'id' => $user->id,
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
+            'email'=> $user->email,
+            'mobile_no' => $user->mobile_no,
+        ];
     }
 }
